@@ -1,7 +1,12 @@
 <ion-content padding>
-    <div id="titulo" style="text-align: center; font-size: 20px"></div>
-    <br>
-    <img id="imagem" style="display: block;margin-left: auto;margin-right: auto; width: 50%;"/>
-    <br>
-  <div style="text-align:justify" [p3x-compile]="innerHtmlVar" [p3x-compile-ctx]="this" [p3x-compile-error-handler]="error" ></div>
+  <ion-navbar>
+    <div style="font-size: 18px;">Tempo: <span id="tempo">1</span></div>
+    <div style="font-size: 18px;">Burraco: <a (click)="apresentarToolTipBurraco()"><span id="burraco"></span></a></div>
+    <div style="font-size: 18px;">Tacada: <span id="tacada">0</span></div>
+  </ion-navbar>
+  <div id="titulo" style="text-align: center; font-size: 20px"></div>
+  <br>
+  <img id="imagem" style="display: block;margin-left: auto;margin-right: auto; width: 50%;" />
+  <br>
+  <div style="text-align:justify" [p3x-compile]="innerHtmlVar" [p3x-compile-ctx]="this" [p3x-compile-error-handler]="error"></div>
 </ion-content>

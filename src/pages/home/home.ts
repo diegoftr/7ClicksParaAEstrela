@@ -1,7 +1,5 @@
-import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
-import { NgModule } from '@angular/core';
-import { Platform } from 'ionic-angular';
+import { Component, ViewChild } from '@angular/core';
+import { NavController, Platform, LoadingController, Content, AlertController } from 'ionic-angular';
 import * as $ from 'jquery';
 import wiki from 'wikijs';
 
@@ -9,20 +7,82 @@ import wiki from 'wikijs';
   selector: 'page-home',
   templateUrl: 'home.html'
 })
-@NgModule({
-})
+
+
 export class HomePage {
 
-  innerHtmlVar:string = "";
+  @ViewChild(Content) content: Content;
 
-  constructor(public navCtrl: NavController, public plt: Platform) {
-    
-    this.iniciarJogo(localStorage.getItem('teste'));
+  innerHtmlVar: string = "";
+
+  tooltip: string = "";
+
+  loading;
+
+  constructor(public navCtrl: NavController, public plt: Platform, public loadingCtrl: LoadingController, private alertCtrl: AlertController) {
+    setInterval(this.iniciarContador, 1000);
+    this.sortearBurraco();
+    this.carregarLoading();
+    this.iniciarJogo(localStorage.getItem('paginaSelecionada'));
+  }
+
+  sortearBurraco() {
+    wiki({ apiUrl: 'http://pt.wikipedia.org/w/api.php' }).random(1).then(
+      results => {
+        wiki({ apiUrl: 'http://pt.wikipedia.org/w/api.php' }).page(results[0]).then(
+          resultado => {
+            resultado.content().then(conteudo => {
+              $("#burraco").html(results[0]);
+              this.tooltip = conteudo.small();
+            })
+          })
+
+      })
+  }
+
+  iniciarContador() {
+    var tempoAtual = parseInt($("#tempo").text());
+    $("#tempo").html((tempoAtual + 1).toString());
   }
 
   irProximaPagina(pagina: string) {
-    localStorage.setItem('teste', pagina);
-    location.reload();
+    this.carregarLoading();
+    this.incrementarTacada();
+    this.content.scrollToTop();
+    if(pagina != $("#burraco").text()) {
+      wiki({ apiUrl: 'http://pt.wikipedia.org/w/api.php' }).page(pagina).then(
+        resultado => {
+          this.limparCampos();
+          localStorage.setItem('paginaSelecionada', pagina);
+          this.pesquisarWiki(pagina);
+        }).catch(e => { alert('Página na wiki não encontrada!'); this.loading.dismiss(); });
+    } else {
+      let alert = this.alertCtrl.create({
+        title: 'Parabens',
+        subTitle: 'Pontuação XXX',
+        buttons: ['Fechar']
+      });
+      alert.present();
+    }
+  }
+
+  incrementarTacada() {
+    var tacadaAtual = parseInt($("#tacada").text());
+    $("#tacada").html((tacadaAtual + 1).toString());
+  }
+
+  limparCampos() {
+    $('titulo').html('');
+    $('#imagem').attr('src', '');
+    this.innerHtmlVar = '';
+  }
+
+  carregarLoading() {
+    this.loading = this.loadingCtrl.create({
+      content: 'Carregando...'
+    });
+
+    this.loading.present();
   }
 
   iniciarJogo(parametro: string) {
@@ -30,7 +90,7 @@ export class HomePage {
       wiki({ apiUrl: 'http://pt.wikipedia.org/w/api.php' }).random(1).then(
         results => {
           this.pesquisarWiki(results[0]);
-          
+
         }
       );
     } else {
@@ -42,26 +102,38 @@ export class HomePage {
     console.log(e)
   }
 
+  apresentarToolTipBurraco() {
+    let alert = this.alertCtrl.create({
+      title: 'ToolTip Burraco',
+      subTitle: this.tooltip,
+      buttons: ['Fechar']
+    });
+    alert.present();
+  }
+
+
   pesquisarWiki(parametro: string) {
     wiki({ apiUrl: 'http://pt.wikipedia.org/w/api.php' }).page(parametro).then(
       resultado => {
-
-        resultado.mainImage().then(img => document.getElementById('imagem').src = img);
-
-        document.getElementById('titulo').innerHTML = parametro;
-        
+        resultado.mainImage().then(img => $("#imagem").attr("src", img));
+        $('titulo').html(parametro);
         resultado.links().then(
           links => {
             resultado.content().then(
               conteudo => {
-                console.log('tamanho - ' + links.length);
+                conteudo = conteudo.split(/&/g).join("&amp;").split(/>/g).join("&gt;").split(/</g).join("&lt;").split(/"/g).join("&quot;").split(/'/g).join("&#039;").split('$').join('');
+                links.sort(function (a, b) { return a.length - b.length });
                 for (let index = 0; index < links.length; index++) {
                   const link = links[index];
-                  conteudo = conteudo.replace(link, '<a (click)="context.irProximaPagina(\'' + link + '\')">' + link + '</a>');
+                  var valor = conteudo.lastIndexOf('>' + link.split(' ')[0]);
+                  if (valor === -1) {
+                    conteudo = conteudo.split(link).join('<a (click)="context.irProximaPagina(\'' + link + '\')">' + link + '</a>');
+                  }
                 }
                 conteudo = conteudo.replace(/(?:\r\n|\r|\n)/g, '<br>');
-                localStorage.setItem('teste', '');
-                this.innerHtmlVar =  conteudo;
+                localStorage.setItem('paginaSelecionada', '');
+                this.innerHtmlVar = conteudo;
+                this.loading.dismiss();
               }
             )
           }
