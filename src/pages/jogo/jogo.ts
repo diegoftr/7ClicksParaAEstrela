@@ -47,12 +47,12 @@ export class JogoPage {
 
   irProximaPagina(pagina: string) {
     this.carregarLoading();
-    this.incrementarTacada();
     this.content.scrollToTop();
     if(pagina != $("#burraco").text()) {
       wiki({ apiUrl: 'http://pt.wikipedia.org/w/api.php' }).page(pagina).then(
         resultado => {
           this.limparCampos();
+          this.incrementarTacada();
           localStorage.setItem('paginaSelecionada', pagina);
           this.pesquisarWiki(pagina);
         }).catch(e => { alert('Página na wiki não encontrada!'); this.loading.dismiss(); });

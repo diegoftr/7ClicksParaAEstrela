@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
-import * as $ from 'jquery';
 
 import { InicioPage } from '../pages/inicio/inicio';
 
@@ -16,9 +15,9 @@ export class MyApp {
 
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen) {
     platform.ready().then(() => {
-      statusBar.styleDefault();
+      statusBar.styleLightContent()
+      statusBar.backgroundColorByName('white');
       splashScreen.hide();
-
     });
   }
 
