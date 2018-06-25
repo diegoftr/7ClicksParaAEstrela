@@ -4,12 +4,12 @@ import * as $ from 'jquery';
 import wiki from 'wikijs';
 
 @Component({
-  selector: 'page-home',
-  templateUrl: 'home.html'
+  selector: 'page-jogo',
+  templateUrl: 'jogo.html'
 })
 
 
-export class HomePage {
+export class JogoPage {
 
   @ViewChild(Content) content: Content;
 
@@ -33,7 +33,7 @@ export class HomePage {
           resultado => {
             resultado.content().then(conteudo => {
               $("#burraco").html(results[0]);
-              this.tooltip = conteudo.small();
+              this.tooltip = conteudo.small().substring(0, 400);
             })
           })
 
@@ -79,7 +79,9 @@ export class HomePage {
 
   carregarLoading() {
     this.loading = this.loadingCtrl.create({
-      content: 'Carregando...'
+      content: '<img src="assets/imgs/golfLoading.gif" height="158" width="222"/>',
+      spinner: 'hide',
+      cssClass: 'transparent'
     });
 
     this.loading.present();
@@ -104,7 +106,7 @@ export class HomePage {
 
   apresentarToolTipBurraco() {
     let alert = this.alertCtrl.create({
-      title: 'ToolTip Burraco',
+      title: 'Ajuda Burraco',
       subTitle: this.tooltip,
       buttons: ['Fechar']
     });
@@ -115,8 +117,8 @@ export class HomePage {
   pesquisarWiki(parametro: string) {
     wiki({ apiUrl: 'http://pt.wikipedia.org/w/api.php' }).page(parametro).then(
       resultado => {
-        resultado.mainImage().then(img => $("#imagem").attr("src", img));
-        $('titulo').html(parametro);
+        resultado.images().then(img => $("#imagem").attr("src", img[0]));
+        $('#titulo').html(parametro);
         resultado.links().then(
           links => {
             resultado.content().then(

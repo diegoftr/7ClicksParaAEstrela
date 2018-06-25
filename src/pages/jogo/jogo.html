@@ -1,0 +1,38 @@
+<ion-content padding style="background-image: url('assets/imgs/grama.jpg')">
+  <ion-navbar hideBackButton>
+    <table style="width: 100%;text-align: center">
+      <tr>
+        <td style="width: 15%">
+            <img src="assets/imgs/relogio.png" />
+        </td>
+        <td style="width: 70%">
+            <img src="assets/imgs/burraco.png" />
+        </td>
+        <td style="width: 15%">
+          <img src="assets/imgs/tacada.png" />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span style="font-size: 18px;" id="tempo">1</span>
+        </td>
+        <td>
+          <a (click)="apresentarToolTipBurraco()">
+            <span style="font-size: 18px;" id="burraco"></span>
+          </a>
+        </td>
+        <td>
+          <span style="font-size: 18px;" id="tacada">0</span>
+        </td>
+      </tr>
+    </table>
+
+
+
+  </ion-navbar>
+  <div id="titulo" class="divConteudo" style="text-align: center; font-size: 25px"></div>
+  <br>
+  <img id="imagem" style="display: block;margin-left: auto;margin-right: auto; width: 50%;" />
+  <br>
+  <div class="divConteudo" [p3x-compile]="innerHtmlVar" [p3x-compile-ctx]="this" [p3x-compile-error-handler]="error"></div>
+</ion-content>
