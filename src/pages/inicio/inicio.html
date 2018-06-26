@@ -1,5 +1,6 @@
 <ion-content style="background-color: black; background-image: url('assets/imgs/wallpaper.jpg');background-size:contain;background-position:center;background-repeat:no-repeat;">
     <div style="text-align: center;display: flex;justify-content: center;align-items: center;height: 100%;">
-        <button (click)="novoJogo()" style="top: 170px;background-color: #229e2d" ion-button round>Novo jogo</button>
+        <button (click)="novoJogo()" style="top: 220px;background-color: #229e2d" ion-button round>Novo jogo</button>
+        <button (click)="continuarJogo()" [hidden]="verificarExiteJogoPendente()" style="top: 220px;background-color: blue" ion-button round>Continuar</button>
     </div>
 </ion-content>

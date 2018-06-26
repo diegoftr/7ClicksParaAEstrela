@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="br.com.diegoftr.golfpedia.app" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>SeteClicks</name>
-    <description>An awesome Ionic/Cordova app.</description>
-    <author email="diegoftr@gmail.com" href="http://ionicframework.com/">Ionic Framework Team</author>
+    <description>GolfpediA</description>
+    <author email="diegoftr@gmail.com" href="http://ionicframework.com/">Diego Rezende</author>
     <content src="index.html" />
     <access origin="*" subdomains="true" />
     <allow-intent href="http://*/*" />

@@ -17,10 +17,8 @@ export class ConfiguracaoPage {
   }
 
   novoJogo() {
-    this.navCtrl.push(JogoPage, {
-      firstPassed: "value 1",
-      secondPassed: "value 2"
-    });
+    localStorage.setItem('configuracaoJogo', '');
+    this.navCtrl.push(JogoPage);
     this.viewCtrl.dismiss();
   }
 }

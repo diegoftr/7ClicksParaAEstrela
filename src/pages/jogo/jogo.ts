@@ -19,20 +19,29 @@ export class JogoPage {
 
   loading;
 
+  configuracaoJogo = localStorage.getItem('configuracaoJogo') ? JSON.parse(localStorage.getItem('configuracaoJogo')) : new Object();
+
   constructor(public navCtrl: NavController, public plt: Platform, public loadingCtrl: LoadingController, private alertCtrl: AlertController) {
-    setInterval(this.iniciarContador, 1000);
+    
+  }
+
+  ionViewDidLoad() {
     this.sortearBurraco();
     this.carregarLoading();
-    this.iniciarJogo(localStorage.getItem('paginaSelecionada'));
+    this.incrementarTacada();
+    this.iniciarJogo(this.configuracaoJogo.paginaWiki);
+    localStorage.setItem('idContador', setInterval(() => {this.iniciarContador()}, 1000).toString());
   }
 
   sortearBurraco() {
     wiki({ apiUrl: 'http://pt.wikipedia.org/w/api.php' }).random(1).then(
       results => {
-        wiki({ apiUrl: 'http://pt.wikipedia.org/w/api.php' }).page(results[0]).then(
+        wiki({ apiUrl: 'http://pt.wikipedia.org/w/api.php' }).page(!this.configuracaoJogo.burraco ? results[0] : this.configuracaoJogo.burraco).then(
           resultado => {
             resultado.content().then(conteudo => {
-              $("#burraco").html(results[0]);
+              this.configuracaoJogo.burraco = !this.configuracaoJogo.burraco ? results[0] : this.configuracaoJogo.burraco;
+              this.salvarConfiguracaoJogo();
+              $("#burraco").html(this.configuracaoJogo.burraco);
               this.tooltip = conteudo.small().substring(0, 400);
             })
           })
@@ -40,8 +49,14 @@ export class JogoPage {
       })
   }
 
+  salvarConfiguracaoJogo() {
+    localStorage.setItem('configuracaoJogo', JSON.stringify(this.configuracaoJogo));
+  }
+
   iniciarContador() {
-    var tempoAtual = parseInt($("#tempo").text());
+    var tempoAtual = !this.configuracaoJogo.tempo ? parseInt($("#tempo").text()) : this.configuracaoJogo.tempo;
+    this.configuracaoJogo.tempo = tempoAtual + 1;
+    this.salvarConfiguracaoJogo();
     $("#tempo").html((tempoAtual + 1).toString());
   }
 
@@ -53,7 +68,8 @@ export class JogoPage {
         resultado => {
           this.limparCampos();
           this.incrementarTacada();
-          localStorage.setItem('paginaSelecionada', pagina);
+          this.configuracaoJogo.paginaWiki = pagina;
+          this.salvarConfiguracaoJogo();
           this.pesquisarWiki(pagina);
         }).catch(e => {
           let alert = this.alertCtrl.create({
@@ -75,8 +91,14 @@ export class JogoPage {
   }
 
   incrementarTacada() {
-    var tacadaAtual = parseInt($("#tacada").text());
-    $("#tacada").html((tacadaAtual + 1).toString());
+    if (!this.configuracaoJogo.tacada) {
+      var tacadaAtual = parseInt($("#tacada").text());
+      this.configuracaoJogo.tacada = tacadaAtual + 1;
+      this.salvarConfiguracaoJogo();
+      $("#tacada").html((tacadaAtual + 1).toString());
+    } else {
+      $("#tacada").html(this.configuracaoJogo.tacada.toString());
+    }
   }
 
   limparCampos() {
@@ -129,7 +151,7 @@ export class JogoPage {
       var posicao = conteudo.search(link.split(' ')[0]);
       var stringPosicao = conteudo.substring(posicao - 100, posicao + 100);
       var valor = stringPosicao.lastIndexOf('<');
-      var valor = valor + stringPosicao.lastIndexOf('>');
+      valor = valor + stringPosicao.lastIndexOf('>');
       if (valor <= -1) {
         conteudo = conteudo.replace(link, '<a (click)="context.irProximaPagina(\'' + link + '\')">' + link + '</a>');
       }
@@ -159,7 +181,6 @@ export class JogoPage {
                   conteudo = this.removerCaracteresInvalidos(conteudo);
                   conteudo = this.adicionarLinks(conteudo, links);
                   conteudo = this.adicionarImagens(conteudo, img);
-                  localStorage.setItem('paginaSelecionada', '');
                   this.innerHtmlVar = conteudo;
                   this.loading.dismiss();
                 }
