@@ -1,12 +1,12 @@
 <ion-content padding style="background-image: url('assets/imgs/grama.jpg')">
-  <ion-navbar hideBackButton style="position: fixed;width: auto;left: 0px;top: 0px;">
+  <ion-navbar hideBackButton style="position: fixed;width: 100%;left: 0px;top: 0px;">
     <table style="width: 100%;text-align: center">
       <tr>
         <td style="width: 15%">
-            <img src="assets/imgs/relogio.png" />
+          <img src="assets/imgs/relogio.png" />
         </td>
         <td style="width: 70%">
-            <img src="assets/imgs/burraco.png" />
+          <img src="assets/imgs/burraco.png" />
         </td>
         <td style="width: 15%">
           <img src="assets/imgs/tacada.png" />
@@ -26,13 +26,10 @@
         </td>
       </tr>
     </table>
-
-
-
   </ion-navbar>
   <div id="titulo" class="divConteudo" style="text-align: center; font-size: 25px;margin-top:100px;"></div>
   <br>
-  <img id="imagem" style="display: block;margin-left: auto;margin-right: auto; width: 50%;" />
+  <img id="imagem" style="display: block;margin-left: auto;margin-right: auto; width: 90%;" />
   <br>
   <div class="divConteudo" [p3x-compile]="innerHtmlVar" [p3x-compile-ctx]="this" [p3x-compile-error-handler]="error"></div>
 </ion-content>

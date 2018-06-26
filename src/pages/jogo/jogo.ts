@@ -48,14 +48,22 @@ export class JogoPage {
   irProximaPagina(pagina: string) {
     this.carregarLoading();
     this.content.scrollToTop();
-    if(pagina != $("#burraco").text()) {
+    if (pagina != $("#burraco").text()) {
       wiki({ apiUrl: 'http://pt.wikipedia.org/w/api.php' }).page(pagina).then(
         resultado => {
           this.limparCampos();
           this.incrementarTacada();
           localStorage.setItem('paginaSelecionada', pagina);
           this.pesquisarWiki(pagina);
-        }).catch(e => { alert('Página na wiki não encontrada!'); this.loading.dismiss(); });
+        }).catch(e => {
+          let alert = this.alertCtrl.create({
+            title: 'Selecione outro link',
+            subTitle: 'Página na wikipedia não encontrada.',
+            buttons: ['Fechar']
+          });
+          alert.present();
+          this.loading.dismiss();
+        });
     } else {
       let alert = this.alertCtrl.create({
         title: 'Parabens',
@@ -100,10 +108,6 @@ export class JogoPage {
     }
   }
 
-  error(e) {
-    console.log(e)
-  }
-
   apresentarToolTipBurraco() {
     let alert = this.alertCtrl.create({
       title: 'Ajuda Burraco',
@@ -113,33 +117,56 @@ export class JogoPage {
     alert.present();
   }
 
+  removerCaracteresInvalidos(conteudo: string) {
+    conteudo = conteudo.split(/&/g).join("&amp;").split(/>/g).join("&gt;").split(/</g).join("&lt;").split(/"/g).join("&quot;").split(/'/g).join("&#039;").split('$').join('').split('{').join('').split('}').join('');
+    return conteudo;
+  }
+
+  adicionarLinks(conteudo: string, links: string[]) {
+    links.sort(function (a, b) { return a.length + b.length });
+    for (let index = 0; index < links.length; index++) {
+      const link = links[index];
+      var posicao = conteudo.search(link.split(' ')[0]);
+      var stringPosicao = conteudo.substring(posicao - 100, posicao + 100);
+      var valor = stringPosicao.lastIndexOf('<');
+      var valor = valor + stringPosicao.lastIndexOf('>');
+      if (valor <= -1) {
+        conteudo = conteudo.replace(link, '<a (click)="context.irProximaPagina(\'' + link + '\')">' + link + '</a>');
+      }
+    }
+    return conteudo;
+  }
+
+  adicionarImagens(conteudo: string, imgs: string[]): any {
+    conteudo = conteudo.replace(/(?:\r\n|\r|\n)/g, '<br>');
+    imgs.forEach(img => {
+      if (img.lastIndexOf('svg') == -1)
+        conteudo = conteudo.replace('<br><br>', '<br><img src="' + img + '" style="display: block;margin-left: auto;margin-right: auto; width: 40%;"/>');
+    });
+    return conteudo;
+  }
 
   pesquisarWiki(parametro: string) {
     wiki({ apiUrl: 'http://pt.wikipedia.org/w/api.php' }).page(parametro).then(
       resultado => {
-        resultado.images().then(img => $("#imagem").attr("src", img[0]));
-        $('#titulo').html(parametro);
-        resultado.links().then(
-          links => {
-            resultado.content().then(
-              conteudo => {
-                conteudo = conteudo.split(/&/g).join("&amp;").split(/>/g).join("&gt;").split(/</g).join("&lt;").split(/"/g).join("&quot;").split(/'/g).join("&#039;").split('$').join('');
-                links.sort(function (a, b) { return a.length - b.length });
-                for (let index = 0; index < links.length; index++) {
-                  const link = links[index];
-                  var valor = conteudo.lastIndexOf('>' + link.split(' ')[0]);
-                  if (valor === -1) {
-                    conteudo = conteudo.split(link).join('<a (click)="context.irProximaPagina(\'' + link + '\')">' + link + '</a>');
-                  }
+        resultado.images().then(img => {
+          $("#imagem").attr("src", img[0])
+          $('#titulo').html(parametro);
+          resultado.links().then(
+            links => {
+              resultado.content().then(
+                conteudo => {
+                  conteudo = this.removerCaracteresInvalidos(conteudo);
+                  conteudo = this.adicionarLinks(conteudo, links);
+                  conteudo = this.adicionarImagens(conteudo, img);
+                  localStorage.setItem('paginaSelecionada', '');
+                  this.innerHtmlVar = conteudo;
+                  this.loading.dismiss();
                 }
-                conteudo = conteudo.replace(/(?:\r\n|\r|\n)/g, '<br>');
-                localStorage.setItem('paginaSelecionada', '');
-                this.innerHtmlVar = conteudo;
-                this.loading.dismiss();
-              }
-            )
-          }
-        );
+              )
+            }
+          );
+        });
       }
     ).catch(e => this.iniciarJogo(null));
   }
